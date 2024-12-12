@@ -1,33 +1,37 @@
 import { StatusBar } from 'expo-status-bar';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
-export default function App() {
+import CardMensagem from './componentes/CardMensagem'
+import api from './services/api';
+import Cadastro from './views/Cadastro';
+import Lista from './views/Lista';
+
+const Stack = createNativeStackNavigator();
+
+const App = () => {
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <CardMensagem/>
-      <CardMensagem/>
-      <CardMensagem/>
-      <CardMensagem/>
-      <CardMensagem/>
-      <CardMensagem/>
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Lista de Produtos"
+          component={Lista}
+          options={{ title: 'Produtos' }}
+        />
+        <Stack.Screen name="Lista" component={Lista} />
 
-      <StatusBar style="auto" />
-    </View>
+        <Stack.Screen
+          name="Cadastro"
+          component={Cadastro}
+          options={{ title: 'Cadastro' }}
+        />
+
+      </Stack.Navigator>
+    </NavigationContainer>
   );
-}
+};
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  titulo:
-  {
-    fontSize: 18,
-    fontWeight: 'bold',
-    marginBottom:10
-  }
-});
+export default App;
+
