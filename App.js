@@ -5,6 +5,13 @@ export default function App() {
   return (
     <View style={styles.container}>
       <Text>Open up App.js to start working on your app!</Text>
+      <CardMensagem/>
+      <CardMensagem/>
+      <CardMensagem/>
+      <CardMensagem/>
+      <CardMensagem/>
+      <CardMensagem/>
+
       <StatusBar style="auto" />
     </View>
   );
@@ -17,4 +24,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  titulo:
+  {
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom:10
+  }
 });
