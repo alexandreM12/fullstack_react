@@ -22,7 +22,7 @@ export default function App() {
   const [descricao, setDescricao] = useState("");
   const [image, setImage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
-  const [editProductId, setEditProductId] = useState(null); // Para armazenar o ID do produto a ser editado
+  const [editProductId, setEditProductId] = useState(null); 
 
   useEffect(() => {
     axios
@@ -62,7 +62,6 @@ export default function App() {
       );
       console.log("Produto enviado:", response.data);
 
-      // Atualiza a lista de produtos com a resposta do back-end
       setProducts((prevProducts) => [...prevProducts, response.data]);
 
       Alert.alert("Sucesso", "Produto enviado com sucesso!");
@@ -111,7 +110,6 @@ export default function App() {
     };
 
     if (editProductId) {
-      // Se estamos editando um produto, fazemos uma requisição PUT
       axios
         .put(
           `https://fullstack-react-14jh.onrender.com/api/produto/${editProductId}`,
@@ -134,7 +132,6 @@ export default function App() {
           Alert.alert("Erro", "Não foi possível atualizar o produto.");
         });
     } else {
-      // Se não estamos editando, fazemos uma requisição POST para adicionar
       axios
         .post(
           "https://fullstack-react-14jh.onrender.com/api/produto",
@@ -165,13 +162,13 @@ export default function App() {
       <Text style={styles.productText}>Quantidade: {quantidade}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
-          onPress={() => editProduct(id)} // Passa o id para a função de editar
+          onPress={() => editProduct(id)} 
           style={[styles.button, styles.editButton]}
         >
           <Text style={styles.buttonText}>Editar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => deleteProductFromBackend(id, index)} // Corrigido para usar `id`
+          onPress={() => deleteProductFromBackend(id, index)} 
           style={[styles.button, styles.deleteButton]}
         >
           <Text style={styles.buttonText}>Deletar</Text>
@@ -181,16 +178,14 @@ export default function App() {
   );
 
   const editProduct = (id) => {
-    // Encontre o produto pelo id
     const product = products.find((prod) => prod._id === id);
   
     if (product) {
-      // Preencha os campos com os dados do produto
       setName(product.nome);
-      setQuantity(product.quantidade.toString()); // Certifique-se de que quantidade seja string para o TextInput
+      setQuantity(product.quantidade.toString()); 
       setDescricao(product.descricao);
-      setImage(product.foto); // Se o produto tem foto, carrega a URL da foto
-      setEditProductId(product._id); // Salva o ID do produto a ser editado
+      setImage(product.foto); 
+      setEditProductId(product._id); 
     } else {
       Alert.alert("Erro", "Produto não encontrado.");
     }
@@ -212,7 +207,7 @@ export default function App() {
           data={products}
           renderItem={({ item, index }) => (
             <Item
-              id={item._id} // Passa o ID do produto
+              id={item._id} 
               nome={item.nome}
               descricao={item.descricao}
               quantidade={item.quantidade}
@@ -221,7 +216,7 @@ export default function App() {
               productId={item._id}
             />
           )}
-          keyExtractor={(item) => item._id} // Usar o ID como chave única
+          keyExtractor={(item) => item._id} 
           style={styles.list}
         />
 
