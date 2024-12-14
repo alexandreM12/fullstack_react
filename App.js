@@ -19,13 +19,61 @@ export default function App() {
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
-  const [Descricao, setDescricao] = useState("");
+  const [descricao, setDescricao] = useState("");
   const [image, setImage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
+  const [editProductId, setEditProductId] = useState(null); // Para armazenar o ID do produto a ser editado
 
-  useEffect(() =>{
-    axios.get("")
-  })
+  useEffect(() => {
+    axios
+      .get("https://fullstack-react-14jh.onrender.com/api/produto")
+      .then((res) => {
+        const data = res.data;
+        setProducts(data);
+        setImage();
+      });
+  });
+
+  const deleteProductFromBackend = async (id, index) => {
+    try {
+      // Faz a solicitação DELETE para o backend
+      await axios.delete(
+        `https://fullstack-react-14jh.onrender.com/api/produto/${id}`
+      );
+
+      // Atualiza o estado local para remover o produto
+      setProducts((prevProducts) => prevProducts.filter((_, i) => i !== index));
+
+      Alert.alert("Sucesso", "Produto deletado com sucesso!");
+    } catch (error) {
+      console.error(error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível deletar o produto. Tente novamente."
+      );
+    }
+  };
+
+  const sendProductToBackend = async (product) => {
+    try {
+      const response = await axios.post(
+        "https://fullstack-react-14jh.onrender.com/api/produto",
+        product
+      );
+      console.log("Produto enviado:", response.data);
+
+      // Atualiza a lista de produtos com a resposta do back-end
+      setProducts((prevProducts) => [...prevProducts, response.data]);
+
+      Alert.alert("Sucesso", "Produto enviado com sucesso!");
+    } catch (error) {
+      console.error("Erro ao enviar produto:", error);
+      Alert.alert(
+        "Erro",
+        "Não foi possível enviar o produto. Tente novamente."
+      );
+    }
+  };
 
   const pickImage = async () => {
     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
@@ -50,54 +98,80 @@ export default function App() {
   };
 
   const addOrUpdateProduct = () => {
-    if (!name || !quantity || !Descricao || !image) {
+    if (!name || !quantity || !descricao) {
       Alert.alert("Erro", "Preencha todos os campos e envie uma imagem");
       return;
     }
 
     const newProduct = {
-      name,
-      quantity: parseInt(quantity),
-      Descricao,
-      image,
+      nome: name,
+      quantidade: parseInt(quantity),
+      descricao: descricao,
+      foto: image,
     };
 
-    if (editIndex !== null) {
-      const updatedProducts = [...products];
-      updatedProducts[editIndex] = newProduct;
-      setProducts(updatedProducts);
-      setEditIndex(null);
+    if (editProductId) {
+      // Se estamos editando um produto, fazemos uma requisição PUT
+      axios
+        .put(
+          `https://fullstack-react-14jh.onrender.com/api/produto/${editProductId}`,
+          newProduct
+        )
+        .then((res) => {
+          const updatedProducts = products.map((product) =>
+            product._id === editProductId ? res.data : product
+          );
+          setProducts(updatedProducts);
+          setEditProductId(null);
+          setName("");
+          setQuantity("");
+          setDescricao("");
+          setImage(null);
+          Alert.alert("Sucesso", "Produto atualizado com sucesso!");
+        })
+        .catch((error) => {
+          console.error("Erro ao atualizar produto:", error);
+          Alert.alert("Erro", "Não foi possível atualizar o produto.");
+        });
     } else {
-      setProducts([...products, newProduct]);
+      // Se não estamos editando, fazemos uma requisição POST para adicionar
+      axios
+        .post(
+          "https://fullstack-react-14jh.onrender.com/api/produto",
+          newProduct
+        )
+        .then((res) => {
+          setProducts([...products, res.data]);
+          setName("");
+          setQuantity("");
+          setDescricao("");
+          setImage(null);
+          Alert.alert("Sucesso", "Produto adicionado com sucesso!");
+        })
+        .catch((error) => {
+          console.error("Erro ao adicionar produto:", error);
+          Alert.alert("Erro", "Não foi possível adicionar o produto.");
+        });
     }
-
-    setName("");
-    setQuantity("");
-    setDescricao("");
-    setImage(null);
   };
 
-  const renderItem = ({ item, index }) => (
+  const Item = ({ id, nome, descricao, quantidade, foto, index }) => (
     <View style={styles.productItem}>
-      {item.image && (
-        <Image source={{ uri: item.image }} style={styles.productImage} />
-      )}
+      {foto && <Image source={{ uri: foto }} style={styles.productImage} />}
       <Text style={styles.productText}>
-        {index + 1}. {item.name}
+        {index + 1}. {nome}
       </Text>
-      <Text style={styles.productText}>Quantidade: {item.quantity}</Text>
-      <Text style={styles.productText}>
-         {item.Descricao}
-      </Text>
+      <Text style={styles.productText}>{descricao}</Text>
+      <Text style={styles.productText}>Quantidade: {quantidade}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
-          onPress={() => editProduct(index)}
+          onPress={() => editProduct(id)} // Passa o id para a função de editar
           style={[styles.button, styles.editButton]}
         >
           <Text style={styles.buttonText}>Editar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => deleteProduct(index)}
+          onPress={() => deleteProductFromBackend(id, index)} // Corrigido para usar `id`
           style={[styles.button, styles.deleteButton]}
         >
           <Text style={styles.buttonText}>Deletar</Text>
@@ -106,13 +180,20 @@ export default function App() {
     </View>
   );
 
-  const editProduct = (index) => {
-    const product = products[index];
-    setName(product.name);
-    setQuantity(product.quantity.toString());
-    setDescricao(product.Descricao);
-    setImage(product.image);
-    setEditIndex(index);
+  const editProduct = (id) => {
+    // Encontre o produto pelo id
+    const product = products.find((prod) => prod._id === id);
+  
+    if (product) {
+      // Preencha os campos com os dados do produto
+      setName(product.nome);
+      setQuantity(product.quantidade.toString()); // Certifique-se de que quantidade seja string para o TextInput
+      setDescricao(product.descricao);
+      setImage(product.foto); // Se o produto tem foto, carrega a URL da foto
+      setEditProductId(product._id); // Salva o ID do produto a ser editado
+    } else {
+      Alert.alert("Erro", "Produto não encontrado.");
+    }
   };
 
   const deleteProduct = (index) => {
@@ -129,10 +210,21 @@ export default function App() {
         <Text style={styles.title}>Estoque de Pedidos</Text>
         <FlatList
           data={products}
-          renderItem={renderItem}
-          keyExtractor={(item, index) => index.toString()}
+          renderItem={({ item, index }) => (
+            <Item
+              id={item._id} // Passa o ID do produto
+              nome={item.nome}
+              descricao={item.descricao}
+              quantidade={item.quantidade}
+              foto={item.foto}
+              index={index}
+              productId={item._id}
+            />
+          )}
+          keyExtractor={(item) => item._id} // Usar o ID como chave única
           style={styles.list}
         />
+
         <View style={styles.form}>
           <Text style={styles.subtitle}>
             {editIndex !== null ? "Editar Produto" : "Cadastrar Novo Produto"}
@@ -146,7 +238,7 @@ export default function App() {
           <TextInput
             placeholder="Descricao"
             style={styles.input}
-            value={Descricao}
+            value={descricao}
             onChangeText={setDescricao}
           />
           <TextInput
@@ -172,7 +264,7 @@ export default function App() {
             style={styles.addButton}
           >
             <Text style={styles.buttonText}>
-              {editIndex !== null ? "Atualizar Produto" : "Adicionar Produto"}
+              {editIndex !== null ? "Atualizar Produto" : "Enviar Produto"}
             </Text>
           </TouchableOpacity>
         </View>
