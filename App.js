@@ -12,17 +12,22 @@ import {
   Platform,
   SafeAreaView,
 } from "react-native";
+import Edit from "./telas/Edit";
 import * as ImagePicker from "expo-image-picker";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
 import axios from "axios";
 
-export default function App() {
+function Home() {
   const [products, setProducts] = useState([]);
   const [name, setName] = useState("");
   const [quantity, setQuantity] = useState("");
   const [descricao, setDescricao] = useState("");
   const [image, setImage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
-  const [editProductId, setEditProductId] = useState(null); 
+  const [editProductId, setEditProductId] = useState(null);
+  const [searchText, setSearchText] = useState(""); // Texto da barra de pesquisa
+  const [filteredProducts, setFilteredProducts] = useState(products); // Lista de produtos filtrados
 
   useEffect(() => {
     axios
@@ -31,22 +36,40 @@ export default function App() {
         const data = res.data;
         setProducts(data);
         setImage();
-      });
-  });
+        setFilteredProducts(data);
+      })
+      .catch((error) => console.error("Erro ao buscar produtos:", error));
+  }, []);
 
-  const deleteProductFromBackend = async (id, index) => {
+  useEffect(() => {
+    const filtered = products.filter((product) =>
+      product.nome.toLowerCase().includes(searchText.toLowerCase())
+    );
+    setFilteredProducts(filtered);
+  }, [searchText, products]);
+
+  const handleSearch = (text) => {
+    setSearchText(text);
+  };
+
+  const deleteProductFromBackend = async (id) => {
     try {
       // Faz a solicitação DELETE para o backend
       await axios.delete(
         `https://fullstack-react-14jh.onrender.com/api/produto/${id}`
       );
 
-      // Atualiza o estado local para remover o produto
-      setProducts((prevProducts) => prevProducts.filter((_, i) => i !== index));
+      // Atualiza o estado local para remover o produto usando o ID
+      setProducts((prevProducts) =>
+        prevProducts.filter((product) => product._id !== id)
+      );
+      setFilteredProducts((prevFiltered) =>
+        prevFiltered.filter((product) => product._id !== id)
+      );
 
       Alert.alert("Sucesso", "Produto deletado com sucesso!");
     } catch (error) {
-      console.error(error);
+      console.error("Erro ao deletar produto:", error);
       Alert.alert(
         "Erro",
         "Não foi possível deletar o produto. Tente novamente."
@@ -110,21 +133,32 @@ export default function App() {
     };
 
     if (editProductId) {
+      // Atualizar produto existente
       axios
         .put(
           `https://fullstack-react-14jh.onrender.com/api/produto/${editProductId}`,
           newProduct
         )
         .then((res) => {
-          const updatedProducts = products.map((product) =>
-            product._id === editProductId ? res.data : product
+          // Atualiza o estado de products e filteredProducts
+          setProducts((prevProducts) =>
+            prevProducts.map((product) =>
+              product._id === editProductId ? res.data : product
+            )
           );
-          setProducts(updatedProducts);
+          setFilteredProducts((prevFiltered) =>
+            prevFiltered.map((product) =>
+              product._id === editProductId ? res.data : product
+            )
+          );
+
+          // Resetar campos
           setEditProductId(null);
           setName("");
           setQuantity("");
           setDescricao("");
           setImage(null);
+
           Alert.alert("Sucesso", "Produto atualizado com sucesso!");
         })
         .catch((error) => {
@@ -132,17 +166,23 @@ export default function App() {
           Alert.alert("Erro", "Não foi possível atualizar o produto.");
         });
     } else {
+      // Adicionar novo produto
       axios
         .post(
           "https://fullstack-react-14jh.onrender.com/api/produto",
           newProduct
         )
         .then((res) => {
-          setProducts([...products, res.data]);
+          // Atualiza o estado de products e filteredProducts
+          setProducts((prevProducts) => [...prevProducts, res.data]);
+          setFilteredProducts((prevFiltered) => [...prevFiltered, res.data]);
+
+          // Resetar campos
           setName("");
           setQuantity("");
           setDescricao("");
           setImage(null);
+
           Alert.alert("Sucesso", "Produto adicionado com sucesso!");
         })
         .catch((error) => {
@@ -162,13 +202,13 @@ export default function App() {
       <Text style={styles.productText}>Quantidade: {quantidade}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
-          onPress={() => editProduct(id)} 
+          onPress={() => editProduct(id)} // Calls editProduct when the button is pressed
           style={[styles.button, styles.editButton]}
         >
           <Text style={styles.buttonText}>Editar</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          onPress={() => deleteProductFromBackend(id, index)} 
+          onPress={() => deleteProductFromBackend(id, index)}
           style={[styles.button, styles.deleteButton]}
         >
           <Text style={styles.buttonText}>Deletar</Text>
@@ -179,13 +219,13 @@ export default function App() {
 
   const editProduct = (id) => {
     const product = products.find((prod) => prod._id === id);
-  
+
     if (product) {
       setName(product.nome);
-      setQuantity(product.quantidade.toString()); 
+      setQuantity(product.quantidade.toString());
       setDescricao(product.descricao);
-      setImage(product.foto); 
-      setEditProductId(product._id); 
+      setImage(product.foto);
+      setEditProductId(product._id); // Set the editProductId
     } else {
       Alert.alert("Erro", "Produto não encontrado.");
     }
@@ -202,12 +242,21 @@ export default function App() {
         style={styles.container}
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
-        <Text style={styles.title}>Estoque de Pedidos</Text>
+        <Text style={styles.title}>Lista dos produtos</Text>
+
+        {/* Barra de Pesquisa */}
+        <TextInput
+          style={styles.searchBar}
+          placeholder="Pesquisar produtos..."
+          value={searchText}
+          onChangeText={handleSearch}
+        />
+
         <FlatList
-          data={products}
+          data={filteredProducts}
           renderItem={({ item, index }) => (
             <Item
-              id={item._id} 
+              id={item._id}
               nome={item.nome}
               descricao={item.descricao}
               quantidade={item.quantidade}
@@ -216,7 +265,7 @@ export default function App() {
               productId={item._id}
             />
           )}
-          keyExtractor={(item) => item._id} 
+          keyExtractor={(item) => item._id}
           style={styles.list}
         />
 
@@ -265,6 +314,18 @@ export default function App() {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
+  );
+}
+const Stack = createStackNavigator();
+
+export default function App() {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator initialRouteName="Home">
+        <Stack.Screen name="Home" component={Home} />
+        <Stack.Screen name="Edit" component={Edit} />
+      </Stack.Navigator>
+    </NavigationContainer>
   );
 }
 
@@ -327,4 +388,12 @@ const styles = StyleSheet.create({
   editButton: { backgroundColor: "#ffc107" },
   deleteButton: { backgroundColor: "#dc3545" },
   form: { marginTop: 10 },
+  searchBar: {
+    height: 40,
+    borderColor: "#ccc",
+    borderWidth: 1,
+    borderRadius: 5,
+    paddingHorizontal: 10,
+    marginVertical: 10,
+  },
 });
