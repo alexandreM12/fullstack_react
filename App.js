@@ -1,19 +1,11 @@
 import React, { useEffect, useState } from "react";
 import {
-  StyleSheet,
-  Text,
-  View,
-  FlatList,
-  TextInput,
-  TouchableOpacity,
-  Alert,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  SafeAreaView,
+  StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, Alert,  Image, KeyboardAvoidingView, Platform, SafeAreaView,
 } from "react-native";
+import Cadast from "./telas/Cadast";
 import Edit from "./telas/Edit";
 import * as ImagePicker from "expo-image-picker";
+import { useNavigation } from "@react-navigation/native";
 import { NavigationContainer } from "@react-navigation/native";
 import { createStackNavigator } from "@react-navigation/stack";
 import axios from "axios";
@@ -26,8 +18,9 @@ function Home() {
   const [image, setImage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [editProductId, setEditProductId] = useState(null);
-  const [searchText, setSearchText] = useState(""); // Texto da barra de pesquisa
-  const [filteredProducts, setFilteredProducts] = useState(products); // Lista de produtos filtrados
+  const [searchText, setSearchText] = useState(""); 
+  const [filteredProducts, setFilteredProducts] = useState(products);
+  const navigation = useNavigation();
 
   useEffect(() => {
     axios
@@ -39,7 +32,7 @@ function Home() {
         setFilteredProducts(data);
       })
       .catch((error) => console.error("Erro ao buscar produtos:", error));
-  }, []);
+  }, [products])
 
   useEffect(() => {
     const filtered = products.filter((product) =>
@@ -54,12 +47,12 @@ function Home() {
 
   const deleteProductFromBackend = async (id) => {
     try {
-      // Faz a solicitação DELETE para o backend
+      
       await axios.delete(
         `https://fullstack-react-14jh.onrender.com/api/produto/${id}`
       );
 
-      // Atualiza o estado local para remover o produto usando o ID
+      
       setProducts((prevProducts) =>
         prevProducts.filter((product) => product._id !== id)
       );
@@ -119,82 +112,10 @@ function Home() {
     }
   };
 
-  const addOrUpdateProduct = () => {
-    if (!name || !quantity || !descricao) {
-      Alert.alert("Erro", "Preencha todos os campos e envie uma imagem");
-      return;
-    }
-
-    const newProduct = {
-      nome: name,
-      quantidade: parseInt(quantity),
-      descricao: descricao,
-      foto: image,
-    };
-
-    if (editProductId) {
-      // Atualizar produto existente
-      axios
-        .put(
-          `https://fullstack-react-14jh.onrender.com/api/produto/${editProductId}`,
-          newProduct
-        )
-        .then((res) => {
-          // Atualiza o estado de products e filteredProducts
-          setProducts((prevProducts) =>
-            prevProducts.map((product) =>
-              product._id === editProductId ? res.data : product
-            )
-          );
-          setFilteredProducts((prevFiltered) =>
-            prevFiltered.map((product) =>
-              product._id === editProductId ? res.data : product
-            )
-          );
-
-          // Resetar campos
-          setEditProductId(null);
-          setName("");
-          setQuantity("");
-          setDescricao("");
-          setImage(null);
-
-          Alert.alert("Sucesso", "Produto atualizado com sucesso!");
-        })
-        .catch((error) => {
-          console.error("Erro ao atualizar produto:", error);
-          Alert.alert("Erro", "Não foi possível atualizar o produto.");
-        });
-    } else {
-      // Adicionar novo produto
-      axios
-        .post(
-          "https://fullstack-react-14jh.onrender.com/api/produto",
-          newProduct
-        )
-        .then((res) => {
-          // Atualiza o estado de products e filteredProducts
-          setProducts((prevProducts) => [...prevProducts, res.data]);
-          setFilteredProducts((prevFiltered) => [...prevFiltered, res.data]);
-
-          // Resetar campos
-          setName("");
-          setQuantity("");
-          setDescricao("");
-          setImage(null);
-
-          Alert.alert("Sucesso", "Produto adicionado com sucesso!");
-        })
-        .catch((error) => {
-          console.error("Erro ao adicionar produto:", error);
-          Alert.alert("Erro", "Não foi possível adicionar o produto.");
-        });
-    }
-  };
 
   const Item = ({ id, nome, descricao, quantidade, foto, index }) => (
     <View style={styles.productItem}>
-      {foto && <Image source={{ uri: foto }} style={styles.productImage} />}
+      {foto && <Image source={{ uri: `https://fullstack-react-14jh.onrender.com${foto}`}} style={styles.productImage} />}
       <Text style={styles.productText}>
         {index + 1}. {nome}
       </Text>
@@ -202,7 +123,10 @@ function Home() {
       <Text style={styles.productText}>Quantidade: {quantidade}</Text>
       <View style={styles.actions}>
         <TouchableOpacity
-          onPress={() => editProduct(id)} // Calls editProduct when the button is pressed
+          onPress={() => {
+            editProduct(id);
+            navigation.navigate("Edit", { id }); 
+          }}
           style={[styles.button, styles.editButton]}
         >
           <Text style={styles.buttonText}>Editar</Text>
@@ -225,7 +149,7 @@ function Home() {
       setQuantity(product.quantidade.toString());
       setDescricao(product.descricao);
       setImage(product.foto);
-      setEditProductId(product._id); // Set the editProductId
+      setEditProductId(product._id);
     } else {
       Alert.alert("Erro", "Produto não encontrado.");
     }
@@ -244,7 +168,6 @@ function Home() {
       >
         <Text style={styles.title}>Lista dos produtos</Text>
 
-        {/* Barra de Pesquisa */}
         <TextInput
           style={styles.searchBar}
           placeholder="Pesquisar produtos..."
@@ -269,7 +192,7 @@ function Home() {
           style={styles.list}
         />
 
-        <View style={styles.form}>
+        {/* <View style={styles.form}>
           <Text style={styles.subtitle}>
             {editIndex !== null ? "Editar Produto" : "Cadastrar Novo Produto"}
           </Text>
@@ -304,14 +227,16 @@ function Home() {
             </View>
           )}
           <TouchableOpacity
-            onPress={addOrUpdateProduct}
             style={styles.addButton}
           >
             <Text style={styles.buttonText}>
               {editIndex !== null ? "Atualizar Produto" : "Enviar Produto"}
             </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
+        <TouchableOpacity style={styles.imageButton} onPress={() => navigation.navigate("Cadast")}>
+          <Text>Novo Produto</Text>
+        </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -324,6 +249,7 @@ export default function App() {
       <Stack.Navigator initialRouteName="Home">
         <Stack.Screen name="Home" component={Home} />
         <Stack.Screen name="Edit" component={Edit} />
+        <Stack.Screen name="Cadast" component={Cadast} />
       </Stack.Navigator>
     </NavigationContainer>
   );
