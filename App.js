@@ -1,6 +1,16 @@
 import React, { useEffect, useState } from "react";
 import {
-  StyleSheet, Text, View, FlatList, TextInput, TouchableOpacity, Alert,  Image, KeyboardAvoidingView, Platform, SafeAreaView,
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TextInput,
+  TouchableOpacity,
+  Alert,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  SafeAreaView,
 } from "react-native";
 import Cadast from "./telas/Cadast";
 import Edit from "./telas/Edit";
@@ -18,7 +28,7 @@ function Home() {
   const [image, setImage] = useState(null);
   const [editIndex, setEditIndex] = useState(null);
   const [editProductId, setEditProductId] = useState(null);
-  const [searchText, setSearchText] = useState(""); 
+  const [searchText, setSearchText] = useState("");
   const [filteredProducts, setFilteredProducts] = useState(products);
   const navigation = useNavigation();
 
@@ -32,7 +42,7 @@ function Home() {
         setFilteredProducts(data);
       })
       .catch((error) => console.error("Erro ao buscar produtos:", error));
-  }, [products])
+  }, [products]);
 
   useEffect(() => {
     const filtered = products.filter((product) =>
@@ -47,12 +57,10 @@ function Home() {
 
   const deleteProductFromBackend = async (id) => {
     try {
-      
       await axios.delete(
         `https://fullstack-react-14jh.onrender.com/api/produto/${id}`
       );
 
-      
       setProducts((prevProducts) =>
         prevProducts.filter((product) => product._id !== id)
       );
@@ -112,10 +120,14 @@ function Home() {
     }
   };
 
-
   const Item = ({ id, nome, descricao, quantidade, foto, index }) => (
     <View style={styles.productItem}>
-      {foto && <Image source={{ uri: `https://fullstack-react-14jh.onrender.com${foto}`}} style={styles.productImage} />}
+      {foto && (
+        <Image
+          source={{ uri: `https://fullstack-react-14jh.onrender.com${foto}` }}
+          style={styles.productImage}
+        />
+      )}
       <Text style={styles.productText}>
         {index + 1}. {nome}
       </Text>
@@ -125,7 +137,7 @@ function Home() {
         <TouchableOpacity
           onPress={() => {
             editProduct(id);
-            navigation.navigate("Edit", { id }); 
+            navigation.navigate("Edit", { id });
           }}
           style={[styles.button, styles.editButton]}
         >
@@ -167,14 +179,17 @@ function Home() {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <Text style={styles.title}>Lista dos produtos</Text>
-
+        <View style={styles.searchContainer}>
         <TextInput
-          style={styles.searchBar}
+          style={styles.searchContainer}
           placeholder="Pesquisar produtos..."
           value={searchText}
           onChangeText={handleSearch}
         />
-
+        <TouchableOpacity>
+          <Text style={styles.searchIcon}>🔍</Text>
+        </TouchableOpacity>
+        </View>
         <FlatList
           data={filteredProducts}
           renderItem={({ item, index }) => (
@@ -234,8 +249,11 @@ function Home() {
             </Text>
           </TouchableOpacity>
         </View> */}
-        <TouchableOpacity style={styles.imageButton} onPress={() => navigation.navigate("Cadast")}>
-          <Text>Novo Produto</Text>
+        <TouchableOpacity
+          style={styles.imageButton}
+          onPress={() => navigation.navigate("Cadast")}
+        >
+          <Text style={styles.buttonText}>Novo Produto</Text>
         </TouchableOpacity>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -314,12 +332,28 @@ const styles = StyleSheet.create({
   editButton: { backgroundColor: "#ffc107" },
   deleteButton: { backgroundColor: "#dc3545" },
   form: { marginTop: 10 },
-  searchBar: {
-    height: 40,
-    borderColor: "#ccc",
-    borderWidth: 1,
-    borderRadius: 5,
+  searchContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#f0f0f0",
+    borderRadius: 25,
+    paddingHorizontal: 15,
+    paddingVertical: 8,
+    marginBottom: 20,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2, // Sombra no Android
+  },
+  searchInput: {
+    flex: 1,
+    fontSize: 16,
     paddingHorizontal: 10,
-    marginVertical: 10,
+    color: "#333",
+  },
+  searchIcon: {
+    fontSize: 20,
+    color: "#007bff", // Azul para combinar com os botões
   },
 });
