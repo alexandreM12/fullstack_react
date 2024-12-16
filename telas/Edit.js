@@ -17,24 +17,6 @@ const Edit = ({ route, navigation }) => {
   const [descricao, setDescricao] = useState("");
   const [image, setImage] = useState(null);
 
-  // useEffect(() => {
-  //   const fetchProduct = async () => {
-  //     try {
-  //       const response = await axios.get(`https://fullstack-react-14jh.onrender.com/api/produto/${id}`);
-  //       const product = response.data;
-  //       setName(product.nome);
-  //       setQuantity(product.quantidade.toString());
-  //       setDescricao(product.descricao);
-  //       setImage(product.foto);
-  //     } catch (error) {
-  //       console.error("Erro ao carregar produto", error);
-  //       Alert.alert("Erro", "Não foi possível carregar os dados do produto.");
-  //     }
-  //   };
-
-  //   fetchProduct();
-  // }, [id]);
-
   const updateProduct = async () => {
     if (!name || !quantity || !descricao) {
       Alert.alert("Erro", "Preencha todos os campos");
@@ -86,21 +68,15 @@ const Edit = ({ route, navigation }) => {
         onChangeText={setQuantity}
         keyboardType="numeric"
       />
-      <TouchableOpacity onPress={() => {}} style={styles.imageButton}>
-        <Text style={styles.buttonText}>
-          {image ? "Trocar Imagem" : "Selecionar Imagem"}
-        </Text>
-      </TouchableOpacity>
-      {image && (
-        <Image source={{ uri: image }} style={{ width: 100, height: 100 }} />
-      )}
-      <TouchableOpacity
-        onPress={updateProduct}
-        style={styles.imageButton}
-      >
-        <Text style={styles.buttonText}>
-          Atualizar Produto
-        </Text>
+      <Text style={styles.label}>imagem</Text>
+      <TextInput
+        style={styles.input}
+        placeholder="URL"
+        placeholderTextColor="#aaa"
+        onChangeText={setImage}
+      />
+      <TouchableOpacity onPress={updateProduct} style={styles.imageButton}>
+        <Text style={styles.buttonText}>Atualizar Produto</Text>
       </TouchableOpacity>
     </View>
   );

@@ -98,41 +98,26 @@ function Home() {
     }
   };
 
-  const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert(
-        "Permissão Negada",
-        "Você precisa permitir o acesso à galeria."
-      );
-      return;
-    }
-
-    const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
-      allowsEditing: true,
-      aspect: [1, 1],
-      quality: 1,
-    });
-
-    if (!result.canceled) {
-      setImage(result.assets[0].uri);
-    }
-  };
-
   const Item = ({ id, nome, descricao, quantidade, foto, index }) => (
     <View style={styles.productItem}>
       {foto && (
         <Image
-          source={{ uri: `https://fullstack-react-14jh.onrender.com${foto}` }}
+          source={{ uri: `${foto}` }}
           style={styles.productImage}
         />
       )}
       <Text style={styles.productText}>
         {index + 1}. {nome}
       </Text>
-      <Text style={styles.productText}>{descricao}</Text>
-      <Text style={styles.productText}>Quantidade: {quantidade}</Text>
+      <View>
+      <Text>descricao:</Text>
+      <Text style={styles.label}>{descricao}</Text>
+      </View>
+
+      <View>
+      <Text>Quantidade:</Text>
+      <Text style={styles.label}>{quantidade}</Text>
+      </View>
       <View style={styles.actions}>
         <TouchableOpacity
           onPress={() => {
@@ -190,6 +175,7 @@ function Home() {
           <Text style={styles.searchIcon}>🔍</Text>
         </TouchableOpacity>
         </View>
+        
         <FlatList
           data={filteredProducts}
           renderItem={({ item, index }) => (
@@ -206,49 +192,6 @@ function Home() {
           keyExtractor={(item) => item._id}
           style={styles.list}
         />
-
-        {/* <View style={styles.form}>
-          <Text style={styles.subtitle}>
-            {editIndex !== null ? "Editar Produto" : "Cadastrar Novo Produto"}
-          </Text>
-          <TextInput
-            placeholder="Nome do Produto"
-            style={styles.input}
-            value={name}
-            onChangeText={setName}
-          />
-          <TextInput
-            placeholder="Descricao"
-            style={styles.input}
-            value={descricao}
-            onChangeText={setDescricao}
-          />
-          <TextInput
-            placeholder="Quantidade"
-            style={styles.input}
-            value={quantity}
-            onChangeText={setQuantity}
-            keyboardType="numeric"
-          />
-
-          <TouchableOpacity onPress={pickImage} style={styles.imageButton}>
-            <Text style={styles.buttonText}>
-              {image ? "Trocar Imagem" : "Selecionar Imagem"}
-            </Text>
-          </TouchableOpacity>
-          {image && (
-            <View style={styles.imageContainer}>
-              <Image source={{ uri: image }} style={styles.previewImage} />
-            </View>
-          )}
-          <TouchableOpacity
-            style={styles.addButton}
-          >
-            <Text style={styles.buttonText}>
-              {editIndex !== null ? "Atualizar Produto" : "Enviar Produto"}
-            </Text>
-          </TouchableOpacity>
-        </View> */}
         <TouchableOpacity
           style={styles.imageButton}
           onPress={() => navigation.navigate("Cadast")}
@@ -349,11 +292,18 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     fontSize: 16,
-    paddingHorizontal: 10,
+    paddingHorizontal: 2,
     color: "#333",
   },
   searchIcon: {
     fontSize: 20,
     color: "#007bff", // Azul para combinar com os botões
+  },
+    label: {
+      padding: 5,
+      borderWidth: 1,
+      backgroundColor: "#fff",
+      borderRadius: 5,
+      marginVertical: 3,
   },
 });
