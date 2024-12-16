@@ -46,6 +46,7 @@ const Edit = ({ route, navigation }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Editar Produto</Text>
+      <Text style={styles.label}>Nome</Text>
       <TextInput
         style={styles.input}
         placeholder="Nome do Produto"
@@ -53,6 +54,7 @@ const Edit = ({ route, navigation }) => {
         value={name}
         onChangeText={setName}
       />
+      <Text style={styles.label}>Descrição</Text>
       <TextInput
         style={styles.input}
         placeholder="Descrição"
@@ -60,6 +62,7 @@ const Edit = ({ route, navigation }) => {
         value={descricao}
         onChangeText={setDescricao}
       />
+      <Text style={styles.label}>Quantidade</Text>
       <TextInput
         style={styles.input}
         placeholder="Quantidade"
@@ -68,7 +71,7 @@ const Edit = ({ route, navigation }) => {
         onChangeText={setQuantity}
         keyboardType="numeric"
       />
-      <Text style={styles.label}>imagem</Text>
+      <Text style={styles.label}>Imagem</Text>
       <TextInput
         style={styles.input}
         placeholder="URL"

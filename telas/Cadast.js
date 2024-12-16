@@ -73,10 +73,10 @@ const Cadast = ({ navigation }) => {
         onChangeText={setQuantidade}
         keyboardType="numeric"
       />
-      <Text style={styles.label}>imagem</Text>
+      <Text style={styles.label}>Image</Text>
       <TextInput
         style={styles.input}
-        placeholder="imagem"
+        placeholder="URL"
         placeholderTextColor="#aaa"
         onChangeText={setFoto}
       />

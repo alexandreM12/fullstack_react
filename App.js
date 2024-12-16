@@ -100,24 +100,27 @@ function Home() {
 
   const Item = ({ id, nome, descricao, quantidade, foto, index }) => (
     <View style={styles.productItem}>
-      {foto && (
-        <Image
-          source={{ uri: `${foto}` }}
-          style={styles.productImage}
-        />
-      )}
-      <Text style={styles.productText}>
-        {index + 1}. {nome}
-      </Text>
-      <View>
-      <Text>descricao:</Text>
-      <Text style={styles.label}>{descricao}</Text>
-      </View>
 
-      <View>
-      <Text>Quantidade:</Text>
-      <Text style={styles.label}>{quantidade}</Text>
+    {foto && (
+      <View style={styles.imageContainer}>
+        <Image source={{ uri: `${foto}` }} style={styles.productImage} />
       </View>
+    )}
+    <Text style={styles.productName}>
+      {index + 1}. {nome}
+    </Text>
+
+    <View style={styles.infoContainer}>
+      <Text style={styles.infoTitle}>Descrição:</Text>
+      <Text style={styles.infoText}>{descricao}</Text>
+    </View>
+
+    <View style={styles.infoContainer}>
+      <Text style={styles.infoTitle}>Quantidade:</Text>
+      <Text style={styles.infoText}>{quantidade}</Text>
+    </View>
+  
+
       <View style={styles.actions}>
         <TouchableOpacity
           onPress={() => {
@@ -165,17 +168,16 @@ function Home() {
       >
         <Text style={styles.title}>Lista dos produtos</Text>
         <View style={styles.searchContainer}>
-        <TextInput
-          style={styles.searchContainer}
-          placeholder="Pesquisar produtos..."
-          value={searchText}
-          onChangeText={handleSearch}
-        />
-        <TouchableOpacity>
-          <Text style={styles.searchIcon}>🔍</Text>
-        </TouchableOpacity>
+          <TextInput
+            placeholder="Pesquisar produtos..."
+            value={searchText}
+            onChangeText={handleSearch}
+          />
+          <TouchableOpacity>
+            <Text style={styles.searchIcon}>🔍</Text>
+          </TouchableOpacity>
         </View>
-        
+
         <FlatList
           data={filteredProducts}
           renderItem={({ item, index }) => (
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
   buttonText: { color: "white", fontSize: 16 },
   list: { flex: 1, marginBottom: 20 },
   productItem: {
-    backgroundColor: "white",
+    backgroundColor: "fff",
     padding: 15,
     borderRadius: 5,
     marginBottom: 10,
@@ -258,13 +260,12 @@ const styles = StyleSheet.create({
     borderRadius: 3,
     alignSelf: "center",
   },
-  imageContainer: { alignItems: "center", marginVertical: 10 },
-  previewImage: { width: 200, height: 200, borderRadius: 10 },
-  addButton: {
-    backgroundColor: "#28a745",
-    padding: 15,
+  productImage: {
+    width: "100%",
+    height: 200,
     borderRadius: 5,
-    alignItems: "center",
+    alignSelf: "center",
+    resizeMode: "cover",
   },
   actions: {
     flexDirection: "row",
@@ -274,36 +275,51 @@ const styles = StyleSheet.create({
   button: { padding: 10, borderRadius: 5 },
   editButton: { backgroundColor: "#ffc107" },
   deleteButton: { backgroundColor: "#dc3545" },
-  form: { marginTop: 10 },
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#f0f0f0",
+    backgroundColor: "#ffff",
     borderRadius: 25,
     paddingHorizontal: 15,
-    paddingVertical: 8,
-    marginBottom: 20,
+    paddingVertical: 10,
+    marginBottom: 10,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
-    elevation: 2, // Sombra no Android
+    elevation: 2,
   },
-  searchInput: {
-    flex: 1,
-    fontSize: 16,
-    paddingHorizontal: 2,
-    color: "#333",
-  },
+
   searchIcon: {
     fontSize: 20,
-    color: "#007bff", // Azul para combinar com os botões
   },
-    label: {
-      padding: 5,
-      borderWidth: 1,
-      backgroundColor: "#fff",
-      borderRadius: 5,
-      marginVertical: 3,
+  infoContainer: {
+    borderRadius: 10,
+    padding: 10, 
+    marginVertical: 8,
+    shadowColor: "#000", 
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3, 
+  },
+  infoTitle: {
+    fontSize: 16,
+    fontWeight: "600", 
+    color: "#34495e", 
+    marginBottom: 5, 
+  },
+  infoText: {
+    fontSize: 14, 
+    color: "#555", 
+    lineHeight: 20, 
+  },
+  productName: {
+    fontSize: 18,
+    fontWeight: "bold",
+    color: "#2c3e50", 
+    textAlign: "center",
+    marginBottom: 1,
+    marginTop: 10,
   },
 });
